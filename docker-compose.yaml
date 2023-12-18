@@ -14,7 +14,7 @@ services:
       - MONGO_INITDB_DATABASE:medilabo
 
   postgres:
-    image: postgres
+    image: postgres:latest
     mem_limit: 700m
     ports:
       - "5578:5432"

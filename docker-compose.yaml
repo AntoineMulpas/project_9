@@ -1,0 +1,177 @@
+version: '3.7'
+
+services:
+  mongo:
+    image: mongo
+    depends_on:
+      patients:
+        condition: service_healthy
+    mem_limit: 700m
+    ports:
+      - "27017:27017"
+    restart: always
+    environment:
+      - MONGO_INITDB_DATABASE:medilabo
+
+  postgres:
+    image: postgres
+    mem_limit: 700m
+    ports:
+      - "5578:5432"
+    restart: always
+    environment:
+      - POSTGRES_DB=medilabo
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+
+  cloud-config:
+    image: cloud-config
+    build: ./microservice_cloud_config
+    depends_on:
+      postgres:
+        condition: service_started
+    mem_limit: 200m
+    ports:
+      - "8182:8182"
+    restart: always  
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:8182/actuator"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  eureka:
+    image: eureka
+    build: ./microservice-eureka
+    depends_on:
+      cloud-config:
+        condition: service_healthy
+        restart: true
+    mem_limit: 700m
+    ports:
+      - "8176:8176"
+    restart: always
+    environment:
+      - IP_ADDRESS=cloud-config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8176/actuator"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+
+  gateway:
+    image: api-gateway
+    build: ./microservice_api_gateways
+    depends_on:
+      eureka:
+        condition: service_healthy
+        restart: true
+    mem_limit: 700m
+    ports:
+      - "8765:8765"
+    restart: always
+    environment:
+      - IP_ADDRESS=eureka
+      - AUTH_IP_ADDRESS=authentication
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8765/actuator"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s    
+
+  evaluation:
+    image: evaluation
+    build: ./microservice-evaluation
+    depends_on:
+      gateway:
+        condition: service_healthy
+        restart: true
+    mem_limit: 700m
+    ports:
+      - "8400:8400"
+    restart: always
+    environment:
+      - IP_ADDRESS=cloud-config
+      - EUREKA_IP_ADDRESS=eureka
+      - NOTE_IP_ADDRESS=gateway
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8400/actuator"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s    
+
+  authentication:
+    image: authentication
+    build: ./microservice-authentication
+    depends_on:
+      evaluation:
+        condition: service_healthy
+        restart: true
+    mem_limit: 700m
+    ports:
+      - "8300:8300"
+    restart: always
+    environment:
+      - IP_ADDRESS=eureka
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8300/api/v1/authentication/getToken"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s    
+
+  patients:
+    image: patient-app
+    build: ./microservice_patient
+    depends_on:
+      authentication:
+        condition: service_healthy
+    mem_limit: 700m
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      - IP_ADDRESS=cloud-config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s      
+
+  notes:
+    image: notes
+    build: ./microservice_notes
+    depends_on:
+      patients:
+        condition: service_healthy
+    mem_limit: 700m
+    ports:
+      - "8081:8081"
+    restart: always
+    environment:
+      - IP_ADDRESS=cloud-config
+      - EUREKA_IP_ADDRESS=eureka
+      - MONGO_IP=mongo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s   
+
+  react:
+    image: react
+    build: ./frontend
+    ports:
+      - 3000:3000
+
+
+     
+
+ 

@@ -61,6 +61,7 @@ function PatientPage () {
              <PatientInformation patient={patientInfo} pop={() => {
                  setToggleInformation(false)
                  setPatientInfo(null)
+                 setRefresh(!refresh)
              }
              }/> :
              <PatientsList/>}

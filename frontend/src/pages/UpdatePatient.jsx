@@ -1,24 +1,23 @@
 import React, {useState} from 'react';
+import {Button} from "react-bootstrap";
 import Address from "../models/Address.jsx";
 import Patient from "../models/Patient.jsx";
 import axios from "axios";
 import tokenStore from "../context/TokenStore.jsx";
-import {Button} from "react-bootstrap";
 
-function AddPatient ({pop}) {
+function UpdatePatient ({patient, pop, id, close}) {
     const token = tokenStore(state => state.token)
     const [formData, setFormData] = useState({
-        firstname: '',
-        lastname: '',
-        dob: '',
-        address: '',
-        zip: '',
-        city: '',
-        gender: 'MALE',
-        phone: '',
+        firstname: patient.firstName,
+        lastname: patient.lastName,
+        dob: patient.dob,
+        address: patient.address.address,
+        zip: patient.address.zip,
+        city: patient.address.city,
+        gender: patient.gender,
+        phone: patient.phone,
     });
 
-    // Function to handle form field changes
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -28,9 +27,10 @@ function AddPatient ({pop}) {
     };
 
     const handleSubmit = () => {
+        console.log(id)
         const address = new Address(null, formData.address, formData.zip, formData.city)
         const patient = new Patient(null, formData.firstname, formData.lastname, formData.dob, formData.phone, formData.gender, address)
-        const url = "http://localhost:8765/api/v1/patient/add"
+        const url = "http://localhost:8765/api/v1/patient/update/" + id
 
 
         const headers = {
@@ -43,10 +43,12 @@ function AddPatient ({pop}) {
             .then(res => {
                 console.log(res.data)
                 pop()
+                close()
             })
             .catch(res => {
                 console.log(res.data)
                 pop()
+                close()
             })
 
 
@@ -54,6 +56,8 @@ function AddPatient ({pop}) {
 
     return (
         <div className={"form-patient"}>
+            <Button onClick={() => pop()}>Retour</Button>
+
             <h2>Informations personnelles</h2>
             <form>
                 <label>
@@ -145,4 +149,4 @@ function AddPatient ({pop}) {
     );
 }
 
-export default AddPatient;
+export default UpdatePatient;

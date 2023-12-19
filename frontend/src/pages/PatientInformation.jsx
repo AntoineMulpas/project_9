@@ -6,12 +6,14 @@ import Modal from 'react-bootstrap/Modal';
 import axios from "axios";
 import useRisk from "../hooks/useRisk.jsx";
 import tokenStore from "../context/TokenStore.jsx";
+import UpdatePatient from "./UpdatePatient.jsx";
 
 function PatientInformation ({patient, pop}) {
     const [refresh, setRefresh] = useState(false)
     const notes = useNotes(refresh ,patient.id)
     const risk = useRisk(refresh, patient.id, patient.gender, patient.dob)
     const [toggleAddNote, setToggleAddNote] = useState(false)
+    const [toggleUpdate, setToggleUpdate] = useState(false)
     const token = tokenStore(state => state.token)
 
     const handleDelete = (id) => {
@@ -35,6 +37,7 @@ function PatientInformation ({patient, pop}) {
     function PatientInformation () {
         return <>
             <Button onClick={pop}>Retour</Button>
+            <Button onClick={() => setToggleUpdate(true)}>Update</Button>
             <Button onClick={() => setToggleAddNote(true)}>Ajouter une note</Button>
             <Card style={{width: '18rem'}}>
                 <Card.Body>
@@ -75,11 +78,20 @@ function PatientInformation ({patient, pop}) {
         </>;
     }
 
+    function getComponentToDisplay () {
+        return <>
+            {toggleUpdate ? <UpdatePatient id={patient.id} patient={patient} pop={pop} close={() => setToggleUpdate(false)} /> : <>
+            {toggleAddNote ? <AddNote patientId={patient.id} pop={() => {
+                setToggleAddNote(false)
+                setRefresh(!refresh)
+            }}/> : PatientInformation()}
+            </>
+            }
+        </>;
+    }
+
     return <div>
-        {toggleAddNote ? <AddNote patientId={patient.id} pop={() => {
-            setToggleAddNote(false)
-            setRefresh(!refresh)
-        }} /> :PatientInformation()}
+        {getComponentToDisplay()}
     </div>
 }
 

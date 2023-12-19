@@ -35,6 +35,7 @@ function AddNote ({patientId, pop}) {
 
     return (
         <div>
+            <Button onClick={() => pop()}>Retour</Button>
             <h1>Ajouter une note</h1>
             <input type={"text"} onChange={event => setNote(event.target.value)}/>
             <Button onClick={handleSubmit}>Ajouter</Button>

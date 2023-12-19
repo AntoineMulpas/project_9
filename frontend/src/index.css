@@ -87,3 +87,17 @@ button:focus-visible {
   display: flex;
   flex-direction: column;
 }
+
+.btn {
+  margin: 2px;
+}
+
+.form-patient {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+.form-patient input {
+  margin: 2px;
+}

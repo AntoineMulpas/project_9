@@ -42,4 +42,11 @@ Stack:
 - Service Eureka: register each instance of service, therefore enable service discovery.
 - Service patient: responsible for the patient business, add, update, retrieve and delete from Postgres DB.
 - Service note: responsible for the note business, add, delete and retrieve from MongoDB.
-- Service evaluation: responsible to analyse notes from a patient file and calculate the risks associated. 
+- Service evaluation: responsible to analyse notes from a patient file and calculate the risks associated.
+
+  **Note on repositories:**
+  - for the sake of simplicity, I have grouped all services in one repository. But while coding this app, I used several repositories. Here the links to the others to show that it is not one commit :
+  - https://github.com/AntoineMulpas/microservice_notes
+  - https://github.com/AntoineMulpas/p9_microservice_patient
+  - https://github.com/AntoineMulpas/microservice-config-repo
+  
